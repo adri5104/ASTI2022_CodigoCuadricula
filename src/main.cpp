@@ -31,7 +31,7 @@ extern DNSServer dnsServer;
 #include "funcionesCuadricula.h"
 #include "Logo.h"
 
-//a
+
 
 
 //------------------------- Objetos y variables globales -------------------------
@@ -52,7 +52,7 @@ volatile int final_;
 uint8_t contador_lineas_horizontales;
 int lineas_a_contar = 0;
 bool flag_horizontal = false;
-uint8_t numero_de_veces_giradas = 0;
+uint8_t numero_de_veces_giradas = 0; //a
 
 
 // Objeto global para el extensor de pines
