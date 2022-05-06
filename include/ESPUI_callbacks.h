@@ -9,11 +9,15 @@
 #include <Adafruit_SSD1306.h>
 #include "Config.h"
 #include "TofSensors.h"
-//#include <Adafruit_PWMServoDriver.h>
+#include <Adafruit_PWMServoDriver.h>
 
 
 
 void callback_umbral(Control*, int);
+void callback_tiempo_giro(Control*, int);
+void callback_tiempo_avance(Control*, int);
+void callback_vel_base(Control*, int);
+
 
 void callback_inicio(Control* , int );
 void callback_final(Control* , int );
@@ -30,6 +34,11 @@ void callback_setkd(Control*, int);
 void callback_setbutton(Control*, int);
 
 void callback_linebutton(Control*, int);
+
+void callback_start_laberinto(Control*, int);
+void callback_t1_laberinto(Control*, int);
+void callback_t2_laberinto(Control*, int);
+
 
 
 

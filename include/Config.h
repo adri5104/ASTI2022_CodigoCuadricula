@@ -9,7 +9,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include "TofSensors.h"
-//#include <Adafruit_PWMServoDriver.h>
+#include <Adafruit_PWMServoDriver.h>
 #include "ESPUI_callbacks.h"
 #include "funcionesSetup.h"
 #include "PCF8575.h"
@@ -42,11 +42,11 @@
 
 //Movidas del sensor siguelineas
 #define SENSORCOUNT 6
-const uint16_t THRESHOLD = 5000;
+const uint16_t THRESHOLD = 4500;
 const float center = 2500.0;
 
-#define MILLIS_GIRO90 900
-#define MILLIS_LLEGADA_A_DESTINO 900
+#define MILLIS_GIRO90 1000
+#define MILLIS_LLEGADA_A_DESTINO 3000
 
 
 enum modos
@@ -55,7 +55,8 @@ enum modos
     MOVIENDOSE,
     LLEGADA_A_DESTINO, //Se mueve un poco mas hacia delante y despues vuelve a pasar a estado esperando
     ORDEN_RECIBIDA,
-    ERROR_
+    ERROR_,
+    MODO_LABERINTO
 
 };
 

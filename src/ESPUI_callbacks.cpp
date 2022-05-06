@@ -17,9 +17,29 @@ extern volatile modos_display Estado_display;
 
 extern NavCuadricula misMotores;
 
+extern int t1;
+extern int t2;
 
 
 
+
+
+
+
+void callback_vel_base(Control* sender, int value)
+{
+    misMotores.setVelBase((uint8_t) sender ->value.toInt());
+}
+
+void callback_tiempo_giro(Control* sender, int value)
+{
+    misMotores.setVgiro(sender->value.toInt());
+}
+
+void callback_tiempo_avance(Control* sender, int value)
+{
+    
+}
 
 void display_mode_callback(Control* sender, int value)
 {
@@ -76,6 +96,32 @@ void pad_callback(Control* sender, int value)
 }
 
 
+void callback_start_laberinto(Control* sender, int value)
+{
+    switch (value) {
+    case B_DOWN:
+        
+    break;
+
+    case B_UP:
+        if(Estado == ESPERANDO) Estado = MODO_LABERINTO;
+
+        //if(Estado == ERROR_) Estado = ESPERANDO;
+    break;
+    }
+    
+    
+
+}
+void callback_t1_laberinto(Control* sender, int value)
+{
+    t1 = sender->value.toInt();
+}
+void callback_t2_laberinto(Control* sender, int value)
+{
+    t2 = sender->value.toInt();
+}
+
 
 
 
@@ -111,6 +157,7 @@ void stop_callback(Control* sender, int value)
     {
         case B_DOWN:
             Estado = ESPERANDO;
+            misMotores.parar();
         break;
     }
 }
@@ -127,13 +174,17 @@ void callback_setki(Control* sender, int value_)
 void callback_setkd(Control* sender, int value_)
 {
     kd = sender->value;
+    
 }
 void callback_setbutton(Control* sender, int value)
 {
-    if(B_DOWN)
+    switch(value)
     {
-        PID::PIDParameters<float> aux(kp.toFloat(), ki.toFloat(), kd.toFloat());
-        misMotores.setPIDparam(aux);
+        case B_DOWN:
+            PID::PIDParameters<float> aux(kp.toFloat(), ki.toFloat(), kd.toFloat());
+            misMotores.setPIDparam(aux);
+            
+        break;
     }
 }
 

@@ -11,6 +11,8 @@
 extern const uint16_t THRESHOLD;
 extern const float center;
 
+
+
 //Clase que gestiona la navegacion en la prueba de la cuadricula
 class NavCuadricula
 {
@@ -34,11 +36,15 @@ class NavCuadricula
         uint8_t vel_pid;
         uint16_t myumbral;
 
+        int t_giro;
+
+
     public:
 
         //Constructor
         NavCuadricula(QTRSensors*, Motor*, Motor*);    
         void setVelBase(uint8_t a){vel_base = a;};
+        uint8_t getVelBase(){return vel_base;};
         void setPIDparam(PID::PIDParameters<float> a)
             {
                 parametros_PID = a;
@@ -68,6 +74,16 @@ class NavCuadricula
         uint16_t getUmbral()
         {
             return myumbral;
+        }
+
+        int getVgiro()
+        {
+            return t_giro;
+        }
+
+        void setVgiro(int a)
+        {
+            t_giro = a;
         }
 };
 

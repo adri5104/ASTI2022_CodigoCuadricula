@@ -28,6 +28,10 @@ void displayThings()
                         display.println("Estado: Esperando");
                         break;
 
+                    case MODO_LABERINTO:
+                        display.println("Estado: Laberinto");
+                        break;
+
                     case ORDEN_RECIBIDA:
                         display.println("Estado: Orden recibida");
                         break;
@@ -121,6 +125,10 @@ void displayThings()
                     display.println("");
                     display.print("Threshold:" );
                     display.println(misMotores.getUmbral());
+                    display.print("T_giro:" );
+                    display.println(misMotores.getVgiro());
+                    display.print("Vel_base:" );
+                    display.println(misMotores.getVelBase());
                     
                 break;
 

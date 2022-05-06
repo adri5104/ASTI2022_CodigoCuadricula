@@ -6,17 +6,18 @@ NavCuadricula::NavCuadricula(QTRSensors*  a, Motor* b, Motor* c )
     MisMotores[RIGHT] = b;
     MisMotores[LEFT] = c;
 
-    PID::PIDParameters<float> aux(1.0,0.0,0.0);
+    PID::PIDParameters<float> aux(2.0,0.1,0.01);
     parametros_PID = aux;
     myPID = new PID::PIDController<float>(aux);
 
     vel_max = 255;
-    vel_base = 100;
+    vel_base = 150;
     myPID->Setpoint = 0.0;
-    myPID->SetOutputLimits(-255, 255);
+    myPID->SetOutputLimits(-50, 50);
     myPID->TurnOn();
 
     myumbral = THRESHOLD;
+    t_giro = MILLIS_GIRO90;
     
 }
 
@@ -34,16 +35,16 @@ void NavCuadricula::retroceder()
 {
     MisMotores[RIGHT]->setBack();
     MisMotores[LEFT]->setBack();
-    MisMotores[RIGHT]->setPWM(200);
-    MisMotores[LEFT]->setPWM(200) ;
+    MisMotores[RIGHT]->setPWM(vel_base);
+    MisMotores[LEFT]->setPWM(vel_base) ;
 }
 
 void NavCuadricula::avanzar()
 {
     MisMotores[RIGHT]->setFwd();
     MisMotores[LEFT]->setFwd();
-    MisMotores[RIGHT]->setPWM(200);
-    MisMotores[LEFT]->setPWM(200) ;
+    MisMotores[RIGHT]->setPWM(vel_base);
+    MisMotores[LEFT]->setPWM(vel_base) ;
 }
 
 void NavCuadricula::girar(bool sentido)
@@ -69,18 +70,18 @@ void NavCuadricula::giro90(bool sentido)
     {
         MisMotores[RIGHT]->setFwd();
         MisMotores[LEFT]->setBack();
-        MisMotores[RIGHT]->setPWM(200);
-        MisMotores[LEFT]->setPWM(200) ;
+        MisMotores[RIGHT]->setPWM(150);
+        MisMotores[LEFT]->setPWM(70) ;
     }else
     {
         MisMotores[RIGHT]->setBack();
         MisMotores[LEFT]->setFwd();
-        MisMotores[RIGHT]->setPWM(200);
-        MisMotores[LEFT]->setPWM(200) ;
+        MisMotores[RIGHT]->setPWM(70);
+        MisMotores[LEFT]->setPWM(150) ;
     }
 
-    delay(MILLIS_GIRO90);
-    this->parar();
+    vTaskDelay(t_giro / portTICK_PERIOD_MS);
+    //this->parar();
 }
 
 float NavCuadricula::getOutput()
@@ -118,7 +119,7 @@ bool NavCuadricula::sobreLineaHorizontal()
 void NavCuadricula::compute()
 {
     posicion = myQtr->readLineBlack(sensorValues);
-    myPID->Input = (posicion - center)/10;
+    myPID->Input =  (posicion - center)/10;
     myPID->Update();
     output = myPID->Output;
     
