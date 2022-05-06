@@ -98,7 +98,6 @@ void configESPUI()
     }
 
     dnsServer.start(DNS_PORT, "*", apIP);
-
     Serial.println("\n\nWiFi parameters:");
     Serial.print("Mode: ");
     Serial.println(WiFi.getMode() == WIFI_AP ? "Station" : "Client");
@@ -107,58 +106,26 @@ void configESPUI()
 
     // --------------------------- Interfaz ---------------------
 
-
-    /*
-    ESPUI.number("Inicio", &callback_inicio, ControlColor::Wetasphalt, 0, 0, 10);
-    ESPUI.number("Final", &callback_final, ControlColor::Wetasphalt,0, 0, 10);
-    ESPUI.button("Comenzar prueba", &start_callback, ControlColor::Turquoise, "Start");
-    ESPUI.button("EMERGENCY STOP", &stop_callback, ControlColor::Alizarin,"STOP" );
-    
-     ESPUI.number("Modo display", &display_mode_callback, ControlColor::Wetasphalt, 0, 0, NUM_MODOS_DISPLAY);
-    
-*/
     uint16_t tab0 =  ESPUI.addControl(ControlType::Tab, "Cuadricula", "Cuadricula");
     uint16_t tab1 =  ESPUI.addControl(ControlType::Tab, "Ajustes generales", "Ajustes generales");
     uint16_t tab2 =  ESPUI.addControl(ControlType::Tab, "Ajustes PID", "Ajustes PID");
     uint16_t tab3 =  ESPUI.addControl(ControlType::Tab, "Minifabrica", "Minifabrica");
-      uint16_t tab4 =  ESPUI.addControl(ControlType::Tab, "Laberinto", "Laberinto");
-
-
+    uint16_t tab4 =  ESPUI.addControl(ControlType::Tab, "Laberinto", "Laberinto");
     ESPUI.addControl(ControlType::Number, "Inicio", "1", ControlColor::Wetasphalt, tab0,&callback_inicio);
     ESPUI.addControl(ControlType::Number, "Final", "1", ControlColor::Wetasphalt,tab0, &callback_final);
     ESPUI.addControl(ControlType::Button, "Iniciar prueba", "Start", ControlColor::Turquoise, tab0, &start_callback);
     ESPUI.addControl(ControlType::Number, "Modo display", "1", ControlColor::Wetasphalt, tab0, &display_mode_callback);
     ESPUI.addControl(ControlType::Button, "EMERGENCY STOP", "STOP", ControlColor::Alizarin, tab0, &stop_callback);
-    
-    
     ESPUI.addControl(ControlType::Number, "Threshold", "4500", ControlColor::Wetasphalt, tab1, &callback_umbral);
     ESPUI.addControl(ControlType::Number, "Tiempo giro", "1000", ControlColor::Wetasphalt, tab1, &callback_tiempo_giro);
     ESPUI.addControl(ControlType::Number, "Velocidad base", "150", ControlColor::Wetasphalt, tab1, &callback_vel_base);
-
     ESPUI.addControl(ControlType::Text, "Kp", "2.0", ControlColor::Wetasphalt, tab2, &callback_setkp );
     ESPUI.addControl(ControlType::Text, "Ki", "0.1", ControlColor::Wetasphalt, tab2, &callback_setki );
     ESPUI.addControl(ControlType::Text, "Kd", "0.01", ControlColor::Wetasphalt, tab2, &callback_setkd );
     ESPUI.addControl(ControlType::Button, "Actualizar parametros", "Update", ControlColor::Turquoise, tab2, &callback_setbutton );
-
-
     ESPUI.addControl(ControlType::Button, "Start laberinto", "press", ControlColor::Turquoise, tab4, &callback_start_laberinto );  
     ESPUI.addControl(ControlType::Number, "Avance 1", "1000", ControlColor::Wetasphalt, tab4, &callback_t1_laberinto);
     ESPUI.addControl(ControlType::Number, "Avance 2", "1000", ControlColor::Wetasphalt, tab4, &callback_t2_laberinto);
-    
-   
     ESPUI.addControl(ControlType::Pad, "Modo manual", "", ControlColor::Wetasphalt, tab3, &pad_callback);
-    /*
-    
-    // statusLabelId = ESPUI.label("Status:", ControlColor::Turquoise, "Stop");
-    ESPUI.sliderContinuous = false;
-    ESPUI.number("Threshold", &callback_umbral, ControlColor::Dark, THRESHOLD, 1000, 7000);
-    ESPUI.number("Tiempo giro", &callback_tiempo_giro, ControlColor::Dark, MILLIS_GIRO90, 0, 7000);
-    ESPUI.number("Velocidad base", &callback_vel_base, ControlColor::Dark, 100, 0, 200);
-    ESPUI.text("Kp", &callback_setkp, ControlColor::Dark, "1.0");
-    ESPUI.text("Ki", &callback_setki, ControlColor::Dark, "0.0");
-    ESPUI.text("Kd", &callback_setkd, ControlColor::Dark, "0.0");
-    ESPUI.button("Actualizar parametros", &stop_callback, ControlColor::Dark,"Actualizar" );
-    ESPUI.pad("Manejo manual", &pad_callback, ControlColor::Dark);
-    */
     ESPUI.begin("Rumbaracha V1");
 }

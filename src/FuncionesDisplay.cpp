@@ -144,12 +144,7 @@ void displayThings()
                         display.print('\n');
                     }
                     display.println(position);
-                    
-
                 break;
-
-                
-
             }
         }display.display();
 }

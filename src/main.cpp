@@ -12,7 +12,6 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include "TofSensors.h"
-#include <Adafruit_PWMServoDriver.h>
 #include "ESPUI_callbacks.h"
 #include "funcionesSetup.h"
 #include "PCF8575.h"
@@ -39,13 +38,7 @@ extern DNSServer dnsServer;
 // Ignorar
 String kp, ki, kd;
 
-//hw_timer_t * timer = NULL;
-
-
-
-
 // Estado
-
 const TickType_t xDelay = 2000 / portTICK_PERIOD_MS;
 volatile modos Estado = ESPERANDO;
 volatile modos_display Estado_display = DISPLAY_MOSTRAR_ESTADO;
@@ -58,7 +51,6 @@ uint8_t contador_lineas_horizontales;
 int lineas_a_contar = 0;
 bool flag_horizontal = false;
 uint8_t numero_de_veces_giradas = 0;
-
 
 // Objeto global para el extensor de pines
 PCF8575 pinExtensor = PCF8575(0x20);
@@ -76,129 +68,19 @@ Motor Motor_izquierdo(PIN_MOTOR_I_IN1, PIN_MOTOR_I_IN2, PIN_MOTOR_I_PWM, PWM_CH_
 // Objeto para el sensor siguelineas qtr8rc
 QTRSensors qtr;
 
-
 // Objeto que maneja los motores
 NavCuadricula misMotores(&qtr, &Motor_derecho, &Motor_izquierdo);
-
-//void IRAM_ATTR onTimer(){
-  //misMotores.compute();
-//}
 
 // Movidas del multitasking
 TaskHandle_t Task_CORE0; // Nucleo secundario
 TaskHandle_t Task_CORE1; // Nucleo principal
 
+// Tiempos para el laberinto cutre
 int t1 = 1000; 
 int t2 = 1000;
 
-
+// Contador para el antirebotes de linea horizontal
 int cont = 0;
-
-//------------------------- Setup  ----------------------------------------------
-void setup(void)
-{
-
-    //timer = timerBegin(0, 80, true);
-    //timerAttachInterrupt(timer, &onTimer, true);
-
-    //timerAlarmWrite(timer, 1000, true);
-    //timerAlarmEnable(timer);
-
-    Wire.setClock(400000);
-    
-
-    // Inicializamos el serial
-    Serial.begin(9600);
-
-    // Se inicializa y configura el display
-    configDisplay();
-    
-    display.clearDisplay();
-    display.drawBitmap(
-    (display.width()  - LOGO_WIDTH ) / 2,
-    (display.height() - LOGO_HEIGHT) / 2,
-    logo_reset, LOGO_WIDTH, LOGO_HEIGHT, 1);
-    display.display();
-    delay(2000);
-
-    display.clearDisplay();
-    display.setTextColor(SSD1306_WHITE);
-    display.setTextSize(1);
-    display.setCursor(1, 1);
-    display.println("Configurando Hardware...");
-    display.display();
-
-    Motor_derecho.init();
-    Motor_izquierdo.init();
-
-    
-    // Se inicializan los pines de los tof
-    MySensors.init();
-
-    // Se inicializa el extensor de pines
-    pinExtensor.begin();
-
-    // Se cambia la direccion de memoria de los sensores tof y se bootean
-    MySensors.setID(TOF_ADRESS_FRONT, TOF_ADRESS_RIGHT, TOF_ADRESS_LEFT);
-    display.println(" Listo");
-    display.display();
-
-    // Funcion que inicializa la interfaz web y todas sus movidas
-    display.println("Configurando web..."); 
-    display.display();
-    configESPUI();
-    display.println(" Listo");
-    display.display();
-
-    // Configuracion del sensor siguelineas
-    display.println("Calibrando qtr...");
-    display.display();
-    qtr.setTypeRC();
-    //qtr.setSensorPins((const uint8_t[]){12, 33, 23, 15, 14, 32}, SENSORCOUNT);
-    qtr.setSensorPins((const uint8_t[])
-    {
-        PIN_QTR_L0, 
-        PIN_QTR_L1, 
-        PIN_QTR_L2, 
-        PIN_QTR_L3, 
-        PIN_QTR_L4, 
-        PIN_QTR_L5 
-    }, SENSORCOUNT);
-    qtr.setEmitterPin(PIN_QTR_LEDON);
-        for (uint16_t i = 0; i < 300; i++)
-    {
-        qtr.calibrate();
-    }
-    display.println(" Listo");
-    display.display();
-
-    delay(1000);
-    display.clearDisplay();
-
-    // -------------- Creamos los dos hilos en los dos nucleos ----------------
-
-    // Para el core 0 (secundario)
-    xTaskCreatePinnedToCore(
-        TaskCORE0code, // funcion de la task
-        "Task_CORE0",  // nombre de la task
-        20000,         // tamano del stack de la task
-        NULL,          // Parametos
-        0,             // task priority
-        &Task_CORE0,   // callback
-        0              // se lo mandamos al nucleo 0
-    );
-
-    // Para el core 1 (principal)
-    xTaskCreatePinnedToCore(
-        TaskCORE1code, // funcion de la task
-        "Task_CORE1",  // nombre de la task
-        10000,         // tamano del stack de la task
-        NULL,          // Parametos
-        1,             // task priority
-        &Task_CORE1,   // callback
-        1              // se lo mandamos al nucleo 1
-    );
-}
 
 //------------------------- EL codigo  -------------------------------------------
 
@@ -221,15 +103,14 @@ void TaskCORE0code(void *pvParameters)
             switch(caso)
             {
                 case C_RECTO:
-                    lineas_a_contar = 4; //((inicio_ >= 1) && (inicio_ <= 6)) ? 7 : 6 ;
-                break;
+                    lineas_a_contar = ((inicio_ >= 1) && (inicio_ <= 6)) ? 7 : 6  ; //4
 
                 case C_RECTOD:  
-                    lineas_a_contar = 5 - final_;//7 - final_;
+                    lineas_a_contar = 7 - final_;//5 - final_;
                 break;
 
                 case C_RECTOI:
-                    lineas_a_contar = final_ - 4;
+                    lineas_a_contar = final_ - 6;
                 break;
 
                 case C_ZIGZAG:
@@ -341,7 +222,7 @@ void TaskCORE0code(void *pvParameters)
                         //vTaskDelay( xDelay );
                         contador_lineas_horizontales = 0;
                         numero_de_veces_giradas++;
-                        lineas_a_contar = 3; // ((inicio_ >= 1) && (inicio_ <= 6)) ? 6 : 5 ;
+                        lineas_a_contar = ((inicio_ >= 1) && (inicio_ <= 6)) ? 6 : 5; // 3((inicio_ >= 1) && (inicio_ <= 6)) ? 6 : 5 ;
                     }
 
                     if((contador_lineas_horizontales == lineas_a_contar) && (numero_de_veces_giradas == 2))
@@ -401,9 +282,6 @@ void TaskCORE0code(void *pvParameters)
         //Serial.print("contador lineas horizontales: ");
         //Serial.println(contador_lineas_horizontales);
         //Serial.println(cont);
-
-        
-
     }
 }
 
@@ -415,13 +293,111 @@ void TaskCORE1code(void *pvParameters)
     for (;;)
     {
         displayThings();
-        
         dnsServer.processNextRequest();
         vTaskDelay(1 / portTICK_PERIOD_MS);
         misMotores.compute();
-
     }
 }
+
+//------------------------- Setup  ----------------------------------------------
+void setup(void)
+{
+    Wire.setClock(400000);
+
+    // Inicializamos el serial
+    Serial.begin(9600);
+
+    // Se inicializa y configura el display
+    configDisplay();
+    
+    // Se muestra el logo
+    display.clearDisplay();
+    display.drawBitmap(
+    (display.width()  - LOGO_WIDTH ) / 2,
+    (display.height() - LOGO_HEIGHT) / 2,
+    logo_reset, LOGO_WIDTH, LOGO_HEIGHT, 1);
+    display.display();
+    delay(2000);
+
+    // Mensaje
+    display.clearDisplay();
+    display.setTextColor(SSD1306_WHITE);
+    display.setTextSize(1);
+    display.setCursor(1, 1);
+    display.println("Configurando Hardware...");
+    display.display();
+
+    // Se inician los motores
+    Motor_derecho.init();
+    Motor_izquierdo.init();
+
+    // Se inicializan los pines de los tof
+    MySensors.init();
+
+    // Se inicializa el extensor de pines
+    pinExtensor.begin();
+
+    // Se cambia la direccion de memoria de los sensores tof y se bootean
+    MySensors.setID(TOF_ADRESS_FRONT, TOF_ADRESS_RIGHT, TOF_ADRESS_LEFT);
+    display.println(" Listo");
+    display.display();
+
+    // Funcion que inicializa la interfaz web y todas sus movidas
+    display.println("Configurando web..."); 
+    display.display();
+    configESPUI();
+    display.println(" Listo");
+    display.display();
+
+    // Configuracion del sensor siguelineas
+    display.println("Calibrando qtr...");
+    display.display();
+    qtr.setTypeRC();
+    qtr.setSensorPins((const uint8_t[])
+    {
+        PIN_QTR_L0, 
+        PIN_QTR_L1, 
+        PIN_QTR_L2, 
+        PIN_QTR_L3, 
+        PIN_QTR_L4, 
+        PIN_QTR_L5 
+    }, SENSORCOUNT);
+    qtr.setEmitterPin(PIN_QTR_LEDON);
+        for (uint16_t i = 0; i < 300; i++)
+    {
+        qtr.calibrate();
+    }
+    display.println(" Listo");
+    display.display();
+
+    delay(1000);
+    display.clearDisplay();
+
+    // -------------- Creamos los dos hilos en los dos nucleos ----------------
+
+    // Para el core 0 (secundario)
+    xTaskCreatePinnedToCore(
+        TaskCORE0code, // funcion de la task
+        "Task_CORE0",  // nombre de la task
+        20000,         // tamano del stack de la task
+        NULL,          // Parametos
+        0,             // task priority
+        &Task_CORE0,   // callback
+        0              // se lo mandamos al nucleo 0
+    );
+
+    // Para el core 1 (principal)
+    xTaskCreatePinnedToCore(
+        TaskCORE1code, // funcion de la task
+        "Task_CORE1",  // nombre de la task
+        10000,         // tamano del stack de la task
+        NULL,          // Parametos
+        1,             // task priority
+        &Task_CORE1,   // callback
+        1              // se lo mandamos al nucleo 1
+    );
+}
+
 
 // No usado
 void loop(void)

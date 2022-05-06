@@ -11,8 +11,6 @@
 extern const uint16_t THRESHOLD;
 extern const float center;
 
-
-
 //Clase que gestiona la navegacion en la prueba de la cuadricula
 class NavCuadricula
 {
